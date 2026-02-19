@@ -7,6 +7,12 @@ from .serializers import BookSerializer
 from .models import Book
 from django.views.decorators.http import require_http_methods
 from decimal import Decimal, InvalidOperation
+from .permissions import IsBookManagerOrReadOnly
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status, permissions
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.throttling import AnonRateThrottle, UserRateThrottle
 
 
 def validate_title_author(data):
@@ -151,9 +157,34 @@ def book_detail_v1(request, book_id):
 class BookListCreateV2(generics.ListCreateAPIView):
     queryset = Book.objects.all().order_by("id")
     serializer_class = BookSerializer
+    permission_classes = [IsBookManagerOrReadOnly]
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
 
 
 class BookDetailV2(generics.RetrieveUpdateDestroyAPIView):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
     http_method_names = ["get", "patch", "delete"]
+    permission_classes = [IsBookManagerOrReadOnly]
+    throttle_classes = [AnonRateThrottle, UserRateThrottle]
+
+
+class LogoutAndBlacklistRefreshTokenView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        refresh = request.data.get("refresh")
+        if not refresh:
+            return Response(
+                {"detail": "refresh is required"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            token = RefreshToken(refresh)
+            token.blacklist()
+        except Exception:
+            return Response(
+                {"detail": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response({"detail": "Logged out"}, status=status.HTTP_205_RESET_CONTENT)
