@@ -1,6 +1,6 @@
 Migrate and create superuser before use.
 
-URLS
+**URLS**
 
 GET     /book-api/v1/books
 POST    /book-api/v1/books
@@ -28,4 +28,3 @@ GET     /auth/users/
 DELETE  /auth/users/me/
 ---------------------------------
 /admin/
----------------------------------
