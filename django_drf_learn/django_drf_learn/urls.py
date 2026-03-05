@@ -24,4 +24,9 @@ urlpatterns = [
     path("auth/", include("djoser.urls")),
     path("auth/", include("djoser.urls.authtoken")),
     path("auth/", include("djoser.urls.jwt")),
+    path("cafe_api/", include("cafe_api.urls")),  # all /api/... endpoints
+    path("token/", include("djoser.urls")),  # /token/users/
+    path(
+        "token/", include("djoser.urls.authtoken")
+    ),  # /token/login/ and /token/logout/
 ]
