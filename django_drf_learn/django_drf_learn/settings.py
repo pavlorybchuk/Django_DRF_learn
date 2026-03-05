@@ -29,12 +29,13 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
 
 INSTALLED_APPS = [
+    "daphne",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -47,7 +48,10 @@ INSTALLED_APPS = [
     "djoser",
     "rest_framework_simplejwt.token_blacklist",
     "cafe_api",
+    "channels",
+    "chat_app",
 ]
+
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -61,10 +65,12 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "django_drf_learn.urls"
 
+ASGI_APPLICATION = "django_drf_learn.asgi.application"
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [os.path.join(BASE_DIR, "templates")],
+        "DIRS": [],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -77,6 +83,14 @@ TEMPLATES = [
     },
 ]
 
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
+}
 
 WSGI_APPLICATION = "django_drf_learn.wsgi.application"
 
@@ -160,3 +174,7 @@ STATICFILES_DIRS = [
 ]
 
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
+LOGIN_REDIRECT_URL = "chat:room_list"
+LOGOUT_REDIRECT_URL = "chat:room_list"
+LOGIN_URL = "/login/"

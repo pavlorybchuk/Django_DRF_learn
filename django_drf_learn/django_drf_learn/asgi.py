@@ -1,16 +1,24 @@
 """
-ASGI config for django_drf_learn project.
-
-It exposes the ASGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/6.0/howto/deployment/asgi/
+ASGI config for chat_project project.
+Exposes the ASGI callable as a module-level variable named ``application``.
 """
 
 import os
-
 from django.core.asgi import get_asgi_application
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+from channels.security.websocket import AllowedHostsOriginValidator
+import chat_app.routing
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_drf_learn.settings')
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "chat_project.settings")
 
-application = get_asgi_application()
+django_asgi_app = get_asgi_application()
+
+application = ProtocolTypeRouter(
+    {
+        "http": django_asgi_app,
+        "websocket": AllowedHostsOriginValidator(
+            AuthMiddlewareStack(URLRouter(chat_app.routing.websocket_urlpatterns))
+        ),
+    }
+)
